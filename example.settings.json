@@ -1,0 +1,51 @@
+{
+  "// Example 1: Default C/C++ Build Script Configuration": "",
+  "ci-on-click.commands": [
+    {
+      "name": "Build UT",
+      "command": "./build.sh ut",
+      "icon": "$(beaker)"
+    },
+    {
+      "name": "Build Clean",
+      "command": "./build.sh clean",
+      "icon": "$(trash)"
+    },
+    {
+      "name": "Build VG",
+      "command": "./build.sh vg",
+      "icon": "$(bug)"
+    },
+    {
+      "name": "Build CI",
+      "command": "./build.sh ci",
+      "icon": "$(rocket)"
+    }
+  ],
+
+  "// Example 2: Python Project": "",
+  "// ci-on-click.commands": [
+  "//   { \"name\": \"Run Tests\", \"command\": \"pytest\", \"icon\": \"$(beaker)\" },
+  "//   { \"name\": \"Lint\", \"command\": \"pylint .\", \"icon\": \"$(checklist)\" },
+  "//   { \"name\": \"Format\", \"command\": \"black .\", \"icon\": \"$(paintcan)\" }
+  "// ],
+
+  "// Example 3: Node.js Project": "",
+  "// ci-on-click.commands": [
+  "//   { \"name\": \"Build\", \"command\": \"npm run build\", \"icon\": \"$(tools)\" },
+  "//   { \"name\": \"Test\", \"command\": \"npm test\", \"icon\": \"$(beaker)\" },
+  "//   { \"name\": \"Start Dev\", \"command\": \"npm run dev\", \"icon\": \"$(play)\" }
+  "// ],
+
+  "// Example 4: Make-based Project": "",
+  "// ci-on-click.commands": [
+  "//   { \"name\": \"Build\", \"command\": \"make\", \"icon\": \"$(tools)\" },
+  "//   { \"name\": \"Clean\", \"command\": \"make clean\", \"icon\": \"$(trash)\" },
+  "//   { \"name\": \"Install\", \"command\": \"make install\", \"icon\": \"$(desktop-download)\" },
+  "//   { \"name\": \"Test\", \"command\": \"make test\", \"icon\": \"$(beaker)\" }
+  "// ],
+
+  "// Configuration Options": "",
+  "ci-on-click.workingDirectory": "${workspaceFolder}",
+  "ci-on-click.showStatusBarButtons": true
+}

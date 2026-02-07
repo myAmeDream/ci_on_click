@@ -1,0 +1,119 @@
+{
+  "name": "ci-on-click",
+  "displayName": "CI on Click",
+  "description": "Execute predefined build and test commands with a single click",
+  "version": "0.0.1",
+  "publisher": "myAmeDream",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/myAmeDream/ci_on_click"
+  },
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ci-on-click.runCommand1",
+        "title": "CI: Run Command 1"
+      },
+      {
+        "command": "ci-on-click.runCommand2",
+        "title": "CI: Run Command 2"
+      },
+      {
+        "command": "ci-on-click.runCommand3",
+        "title": "CI: Run Command 3"
+      },
+      {
+        "command": "ci-on-click.runCommand4",
+        "title": "CI: Run Command 4"
+      },
+      {
+        "command": "ci-on-click.showCommands",
+        "title": "CI: Show All Commands"
+      }
+    ],
+    "configuration": {
+      "title": "CI on Click",
+      "properties": {
+        "ci-on-click.commands": {
+          "type": "array",
+          "default": [
+            {
+              "name": "Build UT",
+              "command": "./build.sh ut",
+              "icon": "$(beaker)"
+            },
+            {
+              "name": "Build Clean",
+              "command": "./build.sh clean",
+              "icon": "$(trash)"
+            },
+            {
+              "name": "Build VG",
+              "command": "./build.sh vg",
+              "icon": "$(bug)"
+            },
+            {
+              "name": "Build CI",
+              "command": "./build.sh ci",
+              "icon": "$(rocket)"
+            }
+          ],
+          "description": "List of commands to execute. Each command should have a 'name', 'command', and optional 'icon'.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Display name for the command"
+              },
+              "command": {
+                "type": "string",
+                "description": "The command to execute"
+              },
+              "icon": {
+                "type": "string",
+                "description": "VS Code icon identifier (e.g., $(beaker), $(rocket))"
+              }
+            }
+          }
+        },
+        "ci-on-click.showStatusBarButtons": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show command buttons in the status bar"
+        },
+        "ci-on-click.workingDirectory": {
+          "type": "string",
+          "default": "${workspaceFolder}",
+          "description": "Working directory for commands. Use ${workspaceFolder} for project root."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.3"
+  }
+}
