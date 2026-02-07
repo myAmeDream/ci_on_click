@@ -3,6 +3,12 @@
   "displayName": "CI on Click",
   "description": "Execute predefined build and test commands with a single click",
   "version": "0.0.1",
+  "publisher": "myAmeDream",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/myAmeDream/ci_on_click"
+  },
   "engines": {
     "vscode": "^1.74.0"
   },
