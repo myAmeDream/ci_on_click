@@ -1,0 +1,26 @@
+{
+  "ci-on-click.commands": [
+    {
+      "name": "Build UT",
+      "command": "./build.sh ut",
+      "icon": "$(beaker)"
+    },
+    {
+      "name": "Build Clean",
+      "command": "./build.sh clean",
+      "icon": "$(trash)"
+    },
+    {
+      "name": "Build VG",
+      "command": "./build.sh vg",
+      "icon": "$(bug)"
+    },
+    {
+      "name": "Build CI",
+      "command": "./build.sh ci",
+      "icon": "$(rocket)"
+    }
+  ],
+  "ci-on-click.workingDirectory": "${workspaceFolder}",
+  "ci-on-click.showStatusBarButtons": true
+}
