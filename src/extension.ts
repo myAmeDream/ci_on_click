@@ -6,137 +6,93 @@ interface CommandConfig {
     icon?: string;
 }
 
+class CommandItem extends vscode.TreeItem {
+    constructor(public readonly config: CommandConfig) {
+        super(config.name, vscode.TreeItemCollapsibleState.None);
+        this.tooltip = config.command;
+        this.description = config.command;
+        this.command = {
+            command: 'ci-on-click.executeCommand',
+            title: config.name,
+            arguments: [config]
+        };
+        this.iconPath = new vscode.ThemeIcon(config.icon || 'terminal');
+    }
+}
+
+class CommandsTreeDataProvider implements vscode.TreeDataProvider<CommandItem> {
+    private _onDidChangeTreeData = new vscode.EventEmitter<void>();
+    readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+
+    refresh(): void {
+        this._onDidChangeTreeData.fire();
+    }
+
+    getTreeItem(element: CommandItem): vscode.TreeItem {
+        return element;
+    }
+
+    getChildren(): CommandItem[] {
+        const config = vscode.workspace.getConfiguration('ci-on-click');
+        const commands = config.get<CommandConfig[]>('commands', []);
+        return commands.map(cmd => new CommandItem(cmd));
+    }
+}
+
+function getWorkingDirectory(): string {
+    const config = vscode.workspace.getConfiguration('ci-on-click');
+    const workingDir = config.get<string>('workingDirectory', '${workspaceFolder}');
+    if (workingDir.includes('${workspaceFolder}')) {
+        const folders = vscode.workspace.workspaceFolders;
+        if (folders && folders.length > 0) {
+            return workingDir.replace('${workspaceFolder}', folders[0].uri.fsPath);
+        }
+    }
+    return workingDir;
+}
+
+function executeCommand(commandText: string, commandName: string) {
+    const workingDir = getWorkingDirectory();
+    let terminal = vscode.window.terminals.find(t => t.name === 'CI on Click');
+    if (!terminal) {
+        terminal = vscode.window.createTerminal({ name: 'CI on Click', cwd: workingDir });
+    }
+    terminal.show();
+    terminal.sendText(commandText);
+    vscode.window.showInformationMessage(`Executing: ${commandName}`);
+}
+
 export function activate(context: vscode.ExtensionContext) {
-    console.log('CI on Click extension is now active!');
+    const provider = new CommandsTreeDataProvider();
+    context.subscriptions.push(
+        vscode.window.registerTreeDataProvider('ci-on-click.commandsView', provider)
+    );
 
-    // Status bar items storage
-    const statusBarItems: vscode.StatusBarItem[] = [];
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ci-on-click.executeCommand', (config: CommandConfig) => {
+            executeCommand(config.command, config.name);
+        })
+    );
 
-    // Function to get workspace folder path
-    function getWorkingDirectory(): string {
-        const config = vscode.workspace.getConfiguration('ci-on-click');
-        const workingDir = config.get<string>('workingDirectory', '${workspaceFolder}');
-        
-        if (workingDir.includes('${workspaceFolder}')) {
-            const workspaceFolders = vscode.workspace.workspaceFolders;
-            if (workspaceFolders && workspaceFolders.length > 0) {
-                return workingDir.replace('${workspaceFolder}', workspaceFolders[0].uri.fsPath);
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ci-on-click.refreshCommands', () => {
+            provider.refresh();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ci-on-click.openSettings', () => {
+            vscode.commands.executeCommand('workbench.action.openSettings', 'ci-on-click');
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeConfiguration(e => {
+            if (e.affectsConfiguration('ci-on-click')) {
+                provider.refresh();
             }
-        }
-        return workingDir;
-    }
-
-    // Function to execute a command in terminal
-    function executeCommand(commandText: string, commandName: string) {
-        const workingDir = getWorkingDirectory();
-        
-        // Create or reuse terminal
-        let terminal = vscode.window.terminals.find(t => t.name === 'CI on Click');
-        if (!terminal) {
-            terminal = vscode.window.createTerminal({
-                name: 'CI on Click',
-                cwd: workingDir
-            });
-        }
-        
-        terminal.show();
-        terminal.sendText(commandText);
-        
-        vscode.window.showInformationMessage(`Executing: ${commandName}`);
-    }
-
-    // Function to create status bar buttons
-    function createStatusBarButtons() {
-        // Clear existing buttons
-        statusBarItems.forEach(item => item.dispose());
-        statusBarItems.length = 0;
-
-        const config = vscode.workspace.getConfiguration('ci-on-click');
-        const showButtons = config.get<boolean>('showStatusBarButtons', true);
-        
-        if (!showButtons) {
-            return;
-        }
-
-        const commands = config.get<CommandConfig[]>('commands', []);
-        
-        // Create status bar buttons for each command (limit to first 4)
-        commands.slice(0, 4).forEach((cmd, index) => {
-            const statusBarItem = vscode.window.createStatusBarItem(
-                vscode.StatusBarAlignment.Left,
-                100 - index
-            );
-            
-            statusBarItem.text = cmd.icon ? `${cmd.icon} ${cmd.name}` : cmd.name;
-            statusBarItem.command = `ci-on-click.runCommand${index + 1}`;
-            statusBarItem.tooltip = `Click to execute: ${cmd.command}`;
-            statusBarItem.show();
-            
-            statusBarItems.push(statusBarItem);
-        });
-    }
-
-    // Register command handlers
-    for (let i = 1; i <= 4; i++) {
-        const disposable = vscode.commands.registerCommand(`ci-on-click.runCommand${i}`, () => {
-            const config = vscode.workspace.getConfiguration('ci-on-click');
-            const commands = config.get<CommandConfig[]>('commands', []);
-            
-            if (commands.length >= i) {
-                const cmd = commands[i - 1];
-                executeCommand(cmd.command, cmd.name);
-            } else {
-                vscode.window.showWarningMessage(`Command ${i} is not configured`);
-            }
-        });
-        context.subscriptions.push(disposable);
-    }
-
-    // Register show all commands handler
-    const showCommandsDisposable = vscode.commands.registerCommand('ci-on-click.showCommands', async () => {
-        const config = vscode.workspace.getConfiguration('ci-on-click');
-        const commands = config.get<CommandConfig[]>('commands', []);
-        
-        if (commands.length === 0) {
-            vscode.window.showWarningMessage('No commands configured. Please configure commands in settings.');
-            return;
-        }
-
-        const items = commands.map(cmd => ({
-            label: cmd.icon ? `${cmd.icon} ${cmd.name}` : cmd.name,
-            description: cmd.command,
-            command: cmd
-        }));
-
-        const selected = await vscode.window.showQuickPick(items, {
-            placeHolder: 'Select a command to execute'
-        });
-
-        if (selected) {
-            executeCommand(selected.command.command, selected.command.name);
-        }
-    });
-    context.subscriptions.push(showCommandsDisposable);
-
-    // Create initial status bar buttons
-    createStatusBarButtons();
-
-    // Watch for configuration changes
-    const configChangeDisposable = vscode.workspace.onDidChangeConfiguration(e => {
-        if (e.affectsConfiguration('ci-on-click')) {
-            createStatusBarButtons();
-        }
-    });
-    context.subscriptions.push(configChangeDisposable);
-
-    // Cleanup
-    context.subscriptions.push({
-        dispose: () => {
-            statusBarItems.forEach(item => item.dispose());
-        }
-    });
+        })
+    );
 }
 
-export function deactivate() {
-    console.log('CI on Click extension is deactivated');
-}
+export function deactivate() {}

@@ -20,28 +20,59 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ci-on-click",
+          "title": "CI on Click",
+          "icon": "./media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "ci-on-click": [
+        {
+          "id": "ci-on-click.commandsView",
+          "name": "Commands"
+        }
+      ]
+    },
+    "viewsWelcome": [
       {
-        "command": "ci-on-click.runCommand1",
-        "title": "CI: Run Command 1"
-      },
-      {
-        "command": "ci-on-click.runCommand2",
-        "title": "CI: Run Command 2"
-      },
-      {
-        "command": "ci-on-click.runCommand3",
-        "title": "CI: Run Command 3"
-      },
-      {
-        "command": "ci-on-click.runCommand4",
-        "title": "CI: Run Command 4"
-      },
-      {
-        "command": "ci-on-click.showCommands",
-        "title": "CI: Show All Commands"
+        "view": "ci-on-click.commandsView",
+        "contents": "No commands configured.\n[Open Settings](command:ci-on-click.openSettings)"
       }
     ],
+    "commands": [
+      {
+        "command": "ci-on-click.executeCommand",
+        "title": "CI: Execute Command"
+      },
+      {
+        "command": "ci-on-click.refreshCommands",
+        "title": "CI: Refresh Commands",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ci-on-click.openSettings",
+        "title": "CI: Open Settings",
+        "icon": "$(settings-gear)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "ci-on-click.refreshCommands",
+          "when": "view == ci-on-click.commandsView",
+          "group": "navigation"
+        },
+        {
+          "command": "ci-on-click.openSettings",
+          "when": "view == ci-on-click.commandsView",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
       "title": "CI on Click",
       "properties": {
@@ -51,25 +82,25 @@
             {
               "name": "Build UT",
               "command": "./build.sh ut",
-              "icon": "$(beaker)"
+              "icon": "beaker"
             },
             {
               "name": "Build Clean",
               "command": "./build.sh clean",
-              "icon": "$(trash)"
+              "icon": "trash"
             },
             {
               "name": "Build VG",
               "command": "./build.sh vg",
-              "icon": "$(bug)"
+              "icon": "bug"
             },
             {
               "name": "Build CI",
               "command": "./build.sh ci",
-              "icon": "$(rocket)"
+              "icon": "rocket"
             }
           ],
-          "description": "List of commands to execute. Each command should have a 'name', 'command', and optional 'icon'.",
+          "description": "List of commands to execute. Each command should have a 'name', 'command', and optional 'icon' (VS Code ThemeIcon id, e.g. 'rocket', 'beaker').",
           "items": {
             "type": "object",
             "properties": {
@@ -79,19 +110,14 @@
               },
               "command": {
                 "type": "string",
-                "description": "The command to execute"
+                "description": "The shell command to execute"
               },
               "icon": {
                 "type": "string",
-                "description": "VS Code icon identifier (e.g., $(beaker), $(rocket))"
+                "description": "VS Code ThemeIcon id (e.g. 'rocket', 'beaker', 'bug', 'play')"
               }
             }
           }
-        },
-        "ci-on-click.showStatusBarButtons": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show command buttons in the status bar"
         },
         "ci-on-click.workingDirectory": {
           "type": "string",
